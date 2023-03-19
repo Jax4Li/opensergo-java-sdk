@@ -1,0 +1,77 @@
+# 1. Generate CA's private key and self-signed certificate
+openssl req -x509 -newkey rsa:4096 -days 365 -nodes -keyout ca-key.pem -out ca-cert.pem -subj "/C=FR/ST=Occitanie/L=Toulouse/O=Tech School/OU=Education/CN=*.techschool.guru/emailAddress=techschool.guru@gmail.com"
+
+echo "CA's self-signed certificate"
+openssl x509 -in ca-cert.pem -noout -text
+
+  # 2. Generate web server's private key and certificate signing request (CSR)
+openssl req -newkey rsa:4096 -nodes -keyout server-key.pem -out server-req.pem -subj "/C=FR/ST=Ile de France/L=Paris/O=PC Book/OU=Computer/CN=*.pcbook.com/emailAddress=pcbook@gmail.com"
+
+  # 3. Use CA's private key to sign web server's CSR and get back the signed certificate
+openssl x509 -req -in server-req.pem -days 60 -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -extfile server-ext.cnf
+
+echo "Server's signed certificate"
+openssl x509 -in server-cert.pem -noout -text
+
+  # 4. Generate client's private key and certificate signing request (CSR)
+openssl req -newkey rsa:4096 -nodes -keyout client-key.pem -out client-req.pem -subj "/C=FR/ST=Alsace/L=Strasbourg/O=PC Client/OU=Computer/CN=*.pcclient.com/emailAddress=pcclient@gmail.com"
+
+  # 5. Use CA's private key to sign client's CSR and get back the signed certificate
+openssl x509 -req -in client-req.pem -days 60 -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out client-cert.pem -extfile client-ext.cnf
+
+echo "Client's signed certificate"
+openssl x509 -in client-cert.pem -noout -text
+
+
+a:
+  >
+  2023-03-18 19:11:16,852 - 0    DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] OUTBOUND SETTINGS: ack=false settings={ENABLE_PUSH=0, MAX_CONCURRENT_STREAMS=0, INITIAL_WINDOW_SIZE=1048576, MAX_HEADER_LIST_SIZE=8192}
+  2023-03-18 19:11:16,856 - 4    DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] OUTBOUND SETTINGS: ack=false settings={MAX_CONCURRENT_STREAMS=2147483647, INITIAL_WINDOW_SIZE=1048576, MAX_HEADER_LIST_SIZE=8192}
+  2023-03-18 19:11:16,861 - 9    DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] OUTBOUND WINDOW_UPDATE: streamId=0 windowSizeIncrement=983041
+  2023-03-18 19:11:16,861 - 9    DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] OUTBOUND WINDOW_UPDATE: streamId=0 windowSizeIncrement=983041
+  2023-03-18 19:11:16,867 - 15   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] INBOUND SETTINGS: ack=false settings={ENABLE_PUSH=0, MAX_CONCURRENT_STREAMS=0, INITIAL_WINDOW_SIZE=1048576, MAX_HEADER_LIST_SIZE=8192}
+  2023-03-18 19:11:16,867 - 15   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] INBOUND SETTINGS: ack=false settings={MAX_CONCURRENT_STREAMS=2147483647, INITIAL_WINDOW_SIZE=1048576, MAX_HEADER_LIST_SIZE=8192}
+  2023-03-18 19:11:16,868 - 16   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:191  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] OUTBOUND SETTINGS: ack=true
+  2023-03-18 19:11:16,868 - 16   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:191  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] OUTBOUND SETTINGS: ack=true
+  2023-03-18 19:11:16,869 - 17   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] INBOUND WINDOW_UPDATE: streamId=0 windowSizeIncrement=983041
+  2023-03-18 19:11:16,880 - 28   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] INBOUND WINDOW_UPDATE: streamId=0 windowSizeIncrement=983041
+  2023-03-18 19:11:16,881 - 29   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:191  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] INBOUND SETTINGS: ack=true
+  2023-03-18 19:11:16,882 - 30   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] OUTBOUND HEADERS: streamId=3 headers=GrpcHttp2OutboundHeaders[:authority: localhost:50051, :path: /io.opensergo.proto.transport.v1.OpenSergoUniversalTransportService/SubscribeConfig, :method: POST, :scheme: http, content-type: application/grpc, te: trailers, user-agent: grpc-java-netty/1.42.1, grpc-accept-encoding: gzip] streamDependency=0 weight=16 exclusive=false padding=0 endStream=false
+  2023-03-18 19:11:16,887 - 35   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:191  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] INBOUND SETTINGS: ack=true
+  2023-03-18 19:11:16,889 - 37   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] INBOUND HEADERS: streamId=3 headers=GrpcHttp2RequestHeaders[:path: /io.opensergo.proto.transport.v1.OpenSergoUniversalTransportService/SubscribeConfig, :authority: localhost:50051, :method: POST, :scheme: http, te: trailers, content-type: application/grpc, user-agent: grpc-java-netty/1.42.1, grpc-accept-encoding: gzip] streamDependency=0 weight=16 exclusive=false padding=0 endStream=false
+  2023-03-18 19:11:16,901 - 49   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] OUTBOUND DATA: streamId=3 padding=0 endStream=false length=69 bytes=0000000040323b6c696875617a656e6764654d6163426f6f6b2d50726f2e6c6f63616c2d3139322e3136382e302e3130332d34313438332d3139323234363430...
+  0000
+  2023-03-18 19:11:16,902 - 50   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] INBOUND DATA: streamId=3 padding=0 endStream=false length=69 bytes=0000000040323b6c696875617a656e6764654d6163426f6f6b2d50726f2e6c6f63616c2d3139322e3136382e302e3130332d34313438332d3139323234363430...
+  2023-03-18 19:11:16,904 - 52   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] OUTBOUND PING: ack=false bytes=1234
+  2023-03-18 19:11:16,905 - 53   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] INBOUND PING: ack=false bytes=1234
+  2023-03-18 19:11:16,905 - 53   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] OUTBOUND PING: ack=true bytes=1234
+  2023-03-18 19:11:16,906 - 54   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] INBOUND PING: ack=true bytes=1234
+  111111
+  2023-03-18 19:11:16,917 - 65   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] OUTBOUND HEADERS: streamId=3 headers=GrpcHttp2OutboundHeaders[:status: 200, content-type: application/grpc, grpc-encoding: identity, grpc-accept-encoding: gzip] padding=0 endStream=false
+  2023-03-18 19:11:16,918 - 66   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] OUTBOUND DATA: streamId=3 padding=0 endStream=false length=14 bytes=00000000090a020801120341434b
+  2023-03-18 19:11:16,918 - 66   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] OUTBOUND HEADERS: streamId=3 headers=GrpcHttp2OutboundHeaders[grpc-status: 0] padding=0 endStream=true
+  2023-03-18 19:11:16,920 - 68   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] INBOUND HEADERS: streamId=3 headers=GrpcHttp2ResponseHeaders[:status: 200, content-type: application/grpc, grpc-encoding: identity, grpc-accept-encoding: gzip] padding=0 endStream=false
+  2023-03-18 19:11:16,921 - 69   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] INBOUND DATA: streamId=3 padding=0 endStream=false length=14 bytes=00000000090a020801120341434b
+  2023-03-18 19:11:16,921 - 69   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] OUTBOUND PING: ack=false bytes=1234
+  2222
+  2023-03-18 19:11:16,922 - 70   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] INBOUND HEADERS: streamId=3 headers=GrpcHttp2ResponseHeaders[grpc-status: 0] padding=0 endStream=true
+  2023-03-18 19:11:16,924 - 72   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] OUTBOUND RST_STREAM: streamId=3 errorCode=8
+  2023-03-18 19:11:16,924 - 72   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] INBOUND PING: ack=false bytes=1234
+  2023-03-18 19:11:16,924 - 72   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] OUTBOUND PING: ack=true bytes=1234
+  2023-03-18 19:11:16,924 - 72   DEBUG [grpc-nio-worker-ELG-3-3] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x542c548e, L:/127.0.0.1:50051 - R:/127.0.0.1:65427] INBOUND RST_STREAM: streamId=3 errorCode=8
+  2023-03-18 19:11:16,924 - 72   DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x477eec17, L:/127.0.0.1:65427 - R:localhost/127.0.0.1:50051] INBOUND PING: ack=true bytes=1234
+
+b:
+  >
+  2023-03-18 19:13:37,993 - 0    DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x2dc25881, L:/127.0.0.1:65525 - R:localhost/127.0.0.1:50051] OUTBOUND SETTINGS: ack=false settings={ENABLE_PUSH=0, MAX_CONCURRENT_STREAMS=0, INITIAL_WINDOW_SIZE=1048576, MAX_HEADER_LIST_SIZE=8192}
+  2023-03-18 19:13:38,001 - 8    DEBUG [grpc-nio-worker-ELG-3-2] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x2dc25881, L:/127.0.0.1:65525 - R:localhost/127.0.0.1:50051] OUTBOUND WINDOW_UPDATE: streamId=0 windowSizeIncrement=983041
+  2023-03-18 19:13:38,018 - 25   DEBUG [grpc-nio-worker-ELG-3-4] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x32bccf6d, L:/0:0:0:0:0:0:0:1:65528 - R:localhost/0:0:0:0:0:0:0:1:50051] OUTBOUND SETTINGS: ack=false settings={ENABLE_PUSH=0, MAX_CONCURRENT_STREAMS=0, INITIAL_WINDOW_SIZE=1048576, MAX_HEADER_LIST_SIZE=8192}
+  2023-03-18 19:13:38,019 - 26   DEBUG [grpc-nio-worker-ELG-3-4] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x32bccf6d, L:/0:0:0:0:0:0:0:1:65528 - R:localhost/0:0:0:0:0:0:0:1:50051] OUTBOUND WINDOW_UPDATE: streamId=0 windowSizeIncrement=983041
+  2023-03-18 19:13:38,849 - 856  DEBUG [grpc-nio-worker-ELG-3-7] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0xae4e353d, L:/127.0.0.1:65529 - R:localhost/127.0.0.1:50051] OUTBOUND SETTINGS: ack=false settings={ENABLE_PUSH=0, MAX_CONCURRENT_STREAMS=0, INITIAL_WINDOW_SIZE=1048576, MAX_HEADER_LIST_SIZE=8192}
+  2023-03-18 19:13:38,851 - 858  DEBUG [grpc-nio-worker-ELG-3-7] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0xae4e353d, L:/127.0.0.1:65529 - R:localhost/127.0.0.1:50051] OUTBOUND WINDOW_UPDATE: streamId=0 windowSizeIncrement=983041
+  2023-03-18 19:13:38,857 - 864  DEBUG [grpc-nio-worker-ELG-3-1] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x1b5ebd05, L:/0:0:0:0:0:0:0:1:65530 - R:localhost/0:0:0:0:0:0:0:1:50051] OUTBOUND SETTINGS: ack=false settings={ENABLE_PUSH=0, MAX_CONCURRENT_STREAMS=0, INITIAL_WINDOW_SIZE=1048576, MAX_HEADER_LIST_SIZE=8192}
+  2023-03-18 19:13:38,858 - 865  DEBUG [grpc-nio-worker-ELG-3-1] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0x1b5ebd05, L:/0:0:0:0:0:0:0:1:65530 - R:localhost/0:0:0:0:0:0:0:1:50051] OUTBOUND WINDOW_UPDATE: streamId=0 windowSizeIncrement=983041
+  2023-03-18 19:13:40,294 - 2301 DEBUG [grpc-nio-worker-ELG-3-4] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0xd95a9fb6, L:/127.0.0.1:65531 - R:localhost/127.0.0.1:50051] OUTBOUND SETTINGS: ack=false settings={ENABLE_PUSH=0, MAX_CONCURRENT_STREAMS=0, INITIAL_WINDOW_SIZE=1048576, MAX_HEADER_LIST_SIZE=8192}
+  2023-03-18 19:13:40,296 - 2303 DEBUG [grpc-nio-worker-ELG-3-4] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0xd95a9fb6, L:/127.0.0.1:65531 - R:localhost/127.0.0.1:50051] OUTBOUND WINDOW_UPDATE: streamId=0 windowSizeIncrement=983041
+  2023-03-18 19:13:40,302 - 2309 DEBUG [grpc-nio-worker-ELG-3-6] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0xafa9bc22, L:/0:0:0:0:0:0:0:1:65532 - R:localhost/0:0:0:0:0:0:0:1:50051] OUTBOUND SETTINGS: ack=false settings={ENABLE_PUSH=0, MAX_CONCURRENT_STREAMS=0, INITIAL_WINDOW_SIZE=1048576, MAX_HEADER_LIST_SIZE=8192}
+  2023-03-18 19:13:40,303 - 2310 DEBUG [grpc-nio-worker-ELG-3-6] io.netty.util.internal.logging.AbstractInternalLogger:214  - [id: 0xafa9bc22, L:/0:0:0:0:0:0:0:1:65532 - R:localhost/0:0:0:0:0:0:0:1:50051] OUTBOUND WINDOW_UPDATE: streamId=0 windowSizeIncrement=983041
