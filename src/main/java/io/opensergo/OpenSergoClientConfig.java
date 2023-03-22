@@ -30,20 +30,36 @@ import java.util.concurrent.TimeUnit;
  * @author Jax4Li
  */
 public class OpenSergoClientConfig {
-    private boolean useTransportSecurity;
-    private int maxInboundMessageSize;
-    private int maxRetryAttempts;
-    private int maxHedgedAttempts;
-    private long retryBufferSize;
-    private long perRpcBufferLimit;
-    private long idleTimeoutMillis;
-    private long keepAliveTimeMillis;
-    private long keepAliveTimeoutMillis;
+    private final boolean useTransportSecurity;
+    private final int maxInboundMessageSize;
+    private final int maxRetryAttempts;
+    private final int maxHedgedAttempts;
+    private final long retryBufferSize;
+    private final long perRpcBufferLimit;
+    private final long idleTimeoutMillis;
+    private final long keepAliveTimeMillis;
+    private final long keepAliveTimeoutMillis;
 
-    private File trustCertCollectionFile;
-    private File keyCertChainFile;
-    private File keyFile;
-    private String keyPassword;
+    private final File serverTrustCertFile;
+    private final File clientCertChainFile;
+    private final File clientPrivateKeyFile;
+    private final String clientPrivateKeyPwd;
+
+    private OpenSergoClientConfig(Builder builder) {
+        this.useTransportSecurity = builder.useTransportSecurity;
+        this.maxInboundMessageSize = builder.maxInboundMessageSize;
+        this.maxRetryAttempts = builder.maxRetryAttempts;
+        this.maxHedgedAttempts = builder.maxHedgedAttempts;
+        this.retryBufferSize = builder.retryBufferSize;
+        this.perRpcBufferLimit = builder.perRpcBufferLimit;
+        this.idleTimeoutMillis = builder.idleTimeoutMillis;
+        this.keepAliveTimeMillis = builder.keepAliveTimeMillis;
+        this.keepAliveTimeoutMillis = builder.keepAliveTimeoutMillis;
+        this.serverTrustCertFile = builder.serverTrustCertFile;
+        this.clientCertChainFile = builder.clientCertChainFile;
+        this.clientPrivateKeyFile = builder.clientPrivateKeyFile;
+        this.clientPrivateKeyPwd = builder.clientPrivateKeyPwd;
+    }
 
     public boolean isUseTransportSecurity() {
         return useTransportSecurity;
@@ -81,28 +97,32 @@ public class OpenSergoClientConfig {
         return keepAliveTimeoutMillis;
     }
 
-    public File getTrustCertCollectionFile() {
-        return trustCertCollectionFile;
+    public File getServerTrustCertFile() {
+        return serverTrustCertFile;
     }
 
-    public File getKeyCertChainFile() {
-        return keyCertChainFile;
+    public File getClientCertChainFile() {
+        return clientCertChainFile;
     }
 
-    public File getKeyFile() {
-        return keyFile;
+    public File getClientPrivateKeyFile() {
+        return clientPrivateKeyFile;
     }
 
-    public String getKeyPassword() {
-        return keyPassword;
+    public String getClientPrivateKeyPwd() {
+        return clientPrivateKeyPwd;
     }
 
     public static class Builder {
         private boolean useTransportSecurity;
-        private File trustCertCollectionFile;
-        private File keyCertChainFile;
-        private File keyFile;
-        private String keyPassword;
+        /** The file should include a collection of X.509 certificates in PEM/CRT format that can be used for verification of the remote server's certificate. */
+        private File serverTrustCertFile;
+        /** An X.509 certificate chain file in PEM/CRT format is from client. */
+        private File clientCertChainFile;
+        /** A PKCS#8 private key file in PEM format is from client.*/
+        private File clientPrivateKeyFile;
+        /** The password of the keyFile, or null if it's not password-protected*/
+        private String clientPrivateKeyPwd;
 
         /** @see io.grpc.internal.AbstractManagedChannelImplBuilder#maxInboundMessageSize */
         private int maxInboundMessageSize = GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
@@ -121,17 +141,18 @@ public class OpenSergoClientConfig {
         /** @see NettyChannelBuilder#keepAliveTimeNanos */
         private long keepAliveTimeMillis = TimeUnit.NANOSECONDS.toMillis(GrpcUtil.KEEPALIVE_TIME_NANOS_DISABLED);
 
-        public OpenSergoClientConfig.Builder serverTls(@Nonnull File trustCertCollectionFile) {
+        public OpenSergoClientConfig.Builder serverSideTls(@Nonnull File serverTrustCertFile) {
             this.useTransportSecurity = true;
-            this.trustCertCollectionFile = trustCertCollectionFile;
+            this.serverTrustCertFile = serverTrustCertFile;
             return this;
         }
 
-        public OpenSergoClientConfig.Builder mutualTls(@Nonnull File keyCertChainFile, @Nonnull File keyFile, @Nullable String keyPassword) {
+        public OpenSergoClientConfig.Builder clientSideTls(@Nonnull File clientCertChainFile, @Nonnull File clientPrivateKeyFile,
+                                                           @Nullable String clientPrivateKeyPwd) {
             this.useTransportSecurity = true;
-            this.keyCertChainFile = keyCertChainFile;
-            this.keyFile = keyFile;
-            this.keyPassword = keyPassword;
+            this.clientCertChainFile = clientCertChainFile;
+            this.clientPrivateKeyFile = clientPrivateKeyFile;
+            this.clientPrivateKeyPwd = clientPrivateKeyPwd;
             return this;
         }
 
@@ -176,21 +197,7 @@ public class OpenSergoClientConfig {
         }
 
         public OpenSergoClientConfig build() {
-            OpenSergoClientConfig clientConfig =  new OpenSergoClientConfig();
-            clientConfig.useTransportSecurity = this.useTransportSecurity;
-            clientConfig.maxInboundMessageSize = this.maxInboundMessageSize;
-            clientConfig.maxRetryAttempts = this.maxRetryAttempts;
-            clientConfig.maxHedgedAttempts = this.maxHedgedAttempts;
-            clientConfig.retryBufferSize = this.retryBufferSize;
-            clientConfig.perRpcBufferLimit = this.perRpcBufferLimit;
-            clientConfig.idleTimeoutMillis = this.idleTimeoutMillis;
-            clientConfig.keepAliveTimeMillis = this.keepAliveTimeMillis;
-            clientConfig.keepAliveTimeoutMillis = this.keepAliveTimeoutMillis;
-            clientConfig.trustCertCollectionFile = this.trustCertCollectionFile;
-            clientConfig.keyCertChainFile = this.keyCertChainFile;
-            clientConfig.keyFile = this.keyFile;
-            clientConfig.keyPassword = this.keyPassword;
-            return new OpenSergoClientConfig();
+            return new OpenSergoClientConfig(this);
         }
     }
 }

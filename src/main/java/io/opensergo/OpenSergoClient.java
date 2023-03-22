@@ -69,7 +69,7 @@ public class OpenSergoClient implements AutoCloseable {
 
         public OpenSergoClient build() {
             if (this.openSergoConfig == null) {
-                this.openSergoConfig = new OpenSergoClientConfig();
+                this.openSergoConfig =  new OpenSergoClientConfig.Builder().build();
             }
 
             return new OpenSergoClient(this.host, this.port, this.openSergoConfig);
@@ -79,7 +79,7 @@ public class OpenSergoClient implements AutoCloseable {
 
     public OpenSergoClient(String host, int port) {
         // TODO: improve default config logic here.
-        this(host, port, new OpenSergoClientConfig());
+        this(host, port, new OpenSergoClientConfig.Builder().build());
     }
 
     public OpenSergoClient(String host, int port, OpenSergoClientConfig clientConfig) {

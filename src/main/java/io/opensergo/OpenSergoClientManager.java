@@ -61,7 +61,7 @@ public class OpenSergoClientManager {
      * @return OpenSergoClient
      */
     public OpenSergoClient getOrCreateClient(String host, int port) {
-        return this.getOrCreateClient(host, port, new OpenSergoClientConfig());
+        return this.getOrCreateClient(host, port, new OpenSergoClientConfig.Builder().build());
     }
 
     /**
@@ -82,7 +82,7 @@ public class OpenSergoClientManager {
             }
 
             if (config == null) {
-                config = new OpenSergoClientConfig();
+                config = new OpenSergoClientConfig.Builder().build();
             }
             openSergoClient = new OpenSergoClient.Builder().endpoint(host, port)
                 .openSergoConfig(config).build();
