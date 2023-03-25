@@ -17,10 +17,14 @@ package io.opensergo;
 
 import io.grpc.internal.GrpcUtil;
 import io.grpc.internal.ManagedChannelImplBuilder;
+import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NettyChannelBuilder;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.net.ssl.SSLException;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +34,6 @@ import java.util.concurrent.TimeUnit;
  * @author Jax4Li
  */
 public class OpenSergoClientConfig {
-    private final boolean useTransportSecurity;
     private final int maxInboundMessageSize;
     private final int maxRetryAttempts;
     private final int maxHedgedAttempts;
@@ -40,13 +43,14 @@ public class OpenSergoClientConfig {
     private final long keepAliveTimeMillis;
     private final long keepAliveTimeoutMillis;
 
+    private final boolean serverSideTls;
     private final File serverTrustCertFile;
+    private final boolean clientSideTls;
     private final File clientCertChainFile;
     private final File clientPrivateKeyFile;
     private final String clientPrivateKeyPwd;
 
     private OpenSergoClientConfig(Builder builder) {
-        this.useTransportSecurity = builder.useTransportSecurity;
         this.maxInboundMessageSize = builder.maxInboundMessageSize;
         this.maxRetryAttempts = builder.maxRetryAttempts;
         this.maxHedgedAttempts = builder.maxHedgedAttempts;
@@ -59,10 +63,24 @@ public class OpenSergoClientConfig {
         this.clientCertChainFile = builder.clientCertChainFile;
         this.clientPrivateKeyFile = builder.clientPrivateKeyFile;
         this.clientPrivateKeyPwd = builder.clientPrivateKeyPwd;
+        this.serverSideTls = builder.serverSideTls;
+        this.clientSideTls = builder.clientSideTls;
     }
 
-    public boolean isUseTransportSecurity() {
-        return useTransportSecurity;
+    public SslContext newSslContext(){
+        SslContextBuilder sslContextBuilder = GrpcSslContexts.forClient();
+        if (this.isServerSideTls()){
+            sslContextBuilder.trustManager(this.getServerTrustCertFile());
+        }
+        if (this.isClientSideTls()){
+            sslContextBuilder.keyManager(this.getClientCertChainFile(),
+                    this.getClientPrivateKeyFile(), this.getClientPrivateKeyPwd());
+        }
+        try {
+            return sslContextBuilder.build();
+        } catch (SSLException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     public int getMaxInboundMessageSize() {
@@ -113,8 +131,17 @@ public class OpenSergoClientConfig {
         return clientPrivateKeyPwd;
     }
 
+    public boolean isServerSideTls() {
+        return serverSideTls;
+    }
+
+    public boolean isClientSideTls() {
+        return clientSideTls;
+    }
+
     public static class Builder {
-        private boolean useTransportSecurity;
+        private boolean serverSideTls;
+        private boolean clientSideTls;
         /** The file should include a collection of X.509 certificates in PEM/CRT format that can be used for verification of the remote server's certificate. */
         private File serverTrustCertFile;
         /** An X.509 certificate chain file in PEM/CRT format is from client. */
@@ -142,14 +169,14 @@ public class OpenSergoClientConfig {
         private long keepAliveTimeMillis = TimeUnit.NANOSECONDS.toMillis(GrpcUtil.KEEPALIVE_TIME_NANOS_DISABLED);
 
         public OpenSergoClientConfig.Builder serverSideTls(@Nonnull File serverTrustCertFile) {
-            this.useTransportSecurity = true;
+            this.serverSideTls = true;
             this.serverTrustCertFile = serverTrustCertFile;
             return this;
         }
 
         public OpenSergoClientConfig.Builder clientSideTls(@Nonnull File clientCertChainFile, @Nonnull File clientPrivateKeyFile,
                                                            @Nullable String clientPrivateKeyPwd) {
-            this.useTransportSecurity = true;
+            this.clientSideTls = true;
             this.clientCertChainFile = clientCertChainFile;
             this.clientPrivateKeyFile = clientPrivateKeyFile;
             this.clientPrivateKeyPwd = clientPrivateKeyPwd;

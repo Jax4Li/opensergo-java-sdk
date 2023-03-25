@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author Jiangnan Jia
+ * @author Jax4Li
  */
 public class OpenSergoClientManager {
 
